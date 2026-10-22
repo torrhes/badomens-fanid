@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import FanIdForm from './components/FanIdForm.jsx';
 import FanIdPreview from './components/FanIdPreview.jsx';
 import { toPngBlob, download } from './lib/exportPng.js';
-import { isValidHandle, SHARE_TEXT } from './lib/validate.js';
+import { isValidHandle, SHARE_TEXT,  SHARE_URL } from './lib/validate.js';
 import { useMediaQuery } from './lib/useMediaQuery.js';
 const EMPTY = { handle: '', name: '', photo: null, photoSrc: null, year: '', top: [] };
 export default function App() {
@@ -37,12 +37,40 @@ export default function App() {
     const b = await blob(); if (!b) return;
     download(b, 'bad-omens-fan-id.png'); setAm({ t: 'Downloaded bad-omens-fan-id.png', c: 'ok' });
   };
-  const share = async () => {
+const share = async () => {
+  if (!isValidHandle(s.handle)) { setAm({ t: 'Add your X handle first.', c: 'err' }); return; }
+  const text = `${SHARE_TEXT} ${SHARE_URL}`; // link dentro do texto: vários apps ignoram o campo `url` quando há arquivo
+  const probe = new File([''], 'x.png', { type: 'image/png' });
+
+  // 1) Celular: folha nativa com imagem + texto + link
+  if (navigator.canShare?.({ files: [probe] })) {
     const b = await blob(); if (!b) return;
-    const f = new File([b], 'bad-omens-fan-id.png', { type: 'image/png' });
-    if (navigator.canShare?.({ files: [f] })) { try { await navigator.share({ files: [f], text: SHARE_TEXT }); setAm({ t: '', c: '' }); } catch {} return; }
-    setAm({ t: 'Sharing isn’t supported here. Download the image instead.', c: '' });
-  };
+    const file = new File([b], 'bad-omens-fan-id.png', { type: 'image/png' });
+    try { await navigator.share({ files: [file], text }); setAm({ t: '', c: '' }); }
+    catch (e) { if (e.name !== 'AbortError') setAm({ t: 'Could not share. Download the image instead.', c: 'err' }); }
+    return;
+  }
+
+  // 2) Desktop: abre o composer do X e põe a imagem na área de transferência.
+  //    A janela e o clipboard precisam ser chamados logo no clique (antes do await demorado).
+  const win = window.open('about:blank', '_blank');
+  const pending = blob();
+  let copied = false;
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': pending })]);
+    copied = true;
+  } catch {}
+  const b = await pending;
+  if (!b) { win?.close(); return; }
+  if (!copied) download(b, 'bad-omens-fan-id.png');
+
+  const url = `https://x.com/intent/post?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(SHARE_URL)}`;
+  if (win) win.location.href = url; else window.location.assign(url);
+  setAm({
+    t: copied ? 'Image copied: press Ctrl+V (⌘+V) in the post.' : 'Image downloaded: attach it to the post.',
+    c: 'ok',
+  });
+};
   return (<>
     <header>
       <div className="an kicker">AN INDEPENDENT FAN PROJECT</div>
