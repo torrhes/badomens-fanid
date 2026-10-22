@@ -14,7 +14,15 @@ const MSG = {
 };
 export default function FanIdForm({ state, setState, onReset }) {
   const [msg, setMsg] = useState({ t: '', c: '' });
-  const set = (p) => setState((s) => ({ ...s, ...p }));
+  const set = (p) => setState((s) => {
+    const patch = typeof p === 'function' ? p(s) : p;
+    const next = {};
+    for (const key of Object.keys(patch || {})) {
+      const value = patch[key];
+      next[key] = typeof value === 'function' ? value(s[key]) : value;
+    }
+    return { ...s, ...next };
+  });
   const onHandle = (e) => {
     const h = normalizeHandle(e.target.value);
     set({ handle: h, ...(state.photoSrc === 'x' ? { photo: null, photoSrc: null } : {}) });
