@@ -1,25 +1,48 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { getBadge } from '../data/badges.js';
 
-export default function FanIdCard({ handle, name, photo, year, top, vertical }) {
+export default function FanIdCard({ handle, name, photo, year, top, vertical, code: codeProp }) {
   const h = handle || 'yourhandle';
-  const [code] = useState(() => String(Math.floor(Math.random() * 1e6)).padStart(6, '0'));
+  const [ownCode] = useState(() => String(Math.floor(Math.random() * 1e6)).padStart(6, '0'));
+  const code = codeProp || ownCode;
+  const pid = 'bc' + useId().replace(/[^a-zA-Z0-9]/g, '');
   const badge = getBadge(year);
   const showName = name && name.toLowerCase() !== h.toLowerCase();
-
+const dots = (
+  <svg className="dots" width="100%" height="100%" aria-hidden="true">
+    {Array.from({ length: 100 }, (_, k) => (
+      <circle
+        key={k} cx="0" cy="0" r={4 * k + 0.5}
+        fill="none" stroke="#000" strokeOpacity="0.4" strokeWidth="1"
+      />
+    ))}
+  </svg>
+);
   const ring = <img className="ring" src="/crown.png" alt="" />;
   const topBar = <div className="top" />;
-  const frame = (
-    <div className="frame">
-      {photo ? (
-        <><img className="p" src={photo} alt="" /><div className="dots" /></>
-      ) : (
-        <><img className="p placeholder" src="/specter.jpg" alt="Specter placeholder" /><div className="dots" /></>
-      )}
+const frame = (
+  <div className="frame">
+    {photo ? (
+      <><img className="p" src={photo} alt="" />{dots}</>
+    ) : (
+      <><img className="p placeholder" src="/specter.jpg" alt="Specter placeholder" />{dots}</>
+    )}
+  </div>
+);
+  const cap = <div className="sm ph-cap">[ {photo ? 'X PROFILE PHOTO' : 'NO PHOTO'} ]</div>;
+  const bar = (
+    <div className="bar">
+      <svg width="100%" height="100%" aria-hidden="true">
+        <defs>
+          <pattern id={pid} patternUnits="userSpaceOnUse" width="9" height="40">
+            <rect x="0" width="2" height="40" fill="#e8e3d8" />
+            <rect x="4" width="1" height="40" fill="#e8e3d8" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill={`url(#${pid})`} />
+      </svg>
     </div>
   );
-  const cap = <div className="sm ph-cap">[ {photo ? 'X PROFILE PHOTO' : 'NO PHOTO'} ]</div>;
-  const bar = <div className="bar" />;
   const fanNo = <div className="sm fan-no">FAN ID Nº {code}</div>;
   const badgeEl = (
     <div className="badge">
@@ -48,7 +71,7 @@ export default function FanIdCard({ handle, name, photo, year, top, vertical }) 
   // Versão vertical (celular): tudo empilhado em uma coluna só.
   if (vertical) {
     return (
-      <div id="card">
+      <div className="card">
         {ring}{topBar}
         {hd}{series}
         <div className="vphoto">{frame}{cap}</div>
@@ -62,7 +85,7 @@ export default function FanIdCard({ handle, name, photo, year, top, vertical }) 
 
   // Versão horizontal (desktop/tablet): igual à original.
   return (
-    <div id="card">
+    <div className="card">
       {ring}{topBar}
       <div className="ph">
         {frame}{cap}{bar}{fanNo}{badgeEl}
