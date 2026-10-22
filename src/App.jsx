@@ -1,11 +1,26 @@
-import { useRef, useState } from 'react';
+import {  useEffect, useRef, useState } from 'react';
 import FanIdForm from './components/FanIdForm.jsx';
 import FanIdPreview from './components/FanIdPreview.jsx';
 import { toPngBlob, download } from './lib/exportPng.js';
 import { isValidHandle, SHARE_TEXT,  SHARE_URL } from './lib/validate.js';
 import { useMediaQuery } from './lib/useMediaQuery.js';
 const EMPTY = { handle: '', name: '', photo: null, photoSrc: null, year: '', top: [] };
+
 export default function App() {
+  const fileRef = useRef(null);
+
+useEffect(() => {
+  fileRef.current = null;
+  if (!isValidHandle(s.handle)) return;
+  let cancelled = false;
+  const t = setTimeout(async () => {
+    try {
+      const b = await toPngBlob(exportRef.current.querySelector('.scene'));
+      if (!cancelled && b) fileRef.current = new File([b], 'bad-omens-fan-id.png', { type: 'image/png' });
+    } catch (e) { console.error(e); }
+  }, 800);
+  return () => { cancelled = true; clearTimeout(t); };
+}, [s.handle, s.name, s.photo, s.year, s.top]);
   const [s, setS] = useState(EMPTY);
   const [am, setAm] = useState({ t: '', c: '' });
   const exportRef = useRef(null);
@@ -43,13 +58,17 @@ const share = async () => {
   const probe = new File([''], 'x.png', { type: 'image/png' });
 
   // 1) Celular: folha nativa com imagem + texto + link
-  if (navigator.canShare?.({ files: [probe] })) {
-    const b = await blob(); if (!b) return;
-    const file = new File([b], 'bad-omens-fan-id.png', { type: 'image/png' });
-    try { await navigator.share({ files: [file], text }); setAm({ t: '', c: '' }); }
-    catch (e) { if (e.name !== 'AbortError') setAm({ t: 'Could not share. Download the image instead.', c: 'err' }); }
-    return;
+if (navigator.canShare?.({ files: [probe] })) {
+  const file = fileRef.current;
+  if (!file) { setAm({ t: 'Preparing the image… tap Share again in a second.', c: '' }); return; }
+  try {
+    await navigator.share({ files: [file], text });
+    setAm({ t: '', c: '' });
+  } catch (e) {
+    if (e.name !== 'AbortError') setAm({ t: `Could not share (${e.name}). Download the image instead.`, c: 'err' });
   }
+  return;
+}
 
   // 2) Desktop: abre o composer do X e põe a imagem na área de transferência.
   //    A janela e o clipboard precisam ser chamados logo no clique (antes do await demorado).
