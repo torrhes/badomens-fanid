@@ -396,7 +396,7 @@ footer {
   margin-top: calc(18 * var(--c));
   background: var(--red);
   padding: calc(4 * var(--c)) calc(8 * var(--c));
-  font-size: calc(12 * var(--c));
+  font-size: calc(10 * var(--c));
   letter-spacing: calc(1 * var(--c));
   white-space: normal;
   max-width: 100%;
