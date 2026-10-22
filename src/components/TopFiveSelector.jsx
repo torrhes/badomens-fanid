@@ -5,15 +5,44 @@ export default function TopFiveSelector({ top, setTop }) {
   const [q, setQ] = useState('');
   const [err, setErr] = useState('');
   const availableSongs = SONGS.filter((song) => !top.some((selected) => selected.toLowerCase() === song.toLowerCase()));
+
   const add = (valueOverride) => {
-    const v = (valueOverride ?? q).trim(); setErr('');
+    const v = (valueOverride ?? q).trim();
+    setErr('');
     if (!v) return;
-    if (top.length >= 5) return setErr('You already have 5 songs.');
-    if (top.some((t) => t.toLowerCase() === v.toLowerCase())) return setErr('That song is already in your list.');
-    setTop([...top, SONGS.find((s) => s.toLowerCase() === v.toLowerCase()) || v.slice(0, 60)]);
+
+    setTop((prev) => {
+      if (prev.length >= 5) {
+        setErr('You already have 5 songs.');
+        return prev;
+      }
+      if (prev.some((t) => t.toLowerCase() === v.toLowerCase())) {
+        setErr('That song is already in your list.');
+        return prev;
+      }
+
+      const nextSong = SONGS.find((s) => s.toLowerCase() === v.toLowerCase()) || v.slice(0, 60);
+      return [...prev, nextSong];
+    });
+
     setQ('');
   };
-  const move = (i, d) => { const j = i + d; if (j < 0 || j >= top.length) return; const n = [...top]; [n[i], n[j]] = [n[j], n[i]]; setTop(n); };
+
+  const move = (i, d) => {
+    const j = i + d;
+    if (j < 0 || j >= top.length) return;
+
+    setTop((prev) => {
+      const next = [...prev];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  };
+
+  const remove = (i) => {
+    setTop((prev) => prev.filter((_, index) => index !== i));
+  };
+
   return (
     <fieldset>
       <legend>02 / TOP 5</legend>
@@ -33,10 +62,10 @@ export default function TopFiveSelector({ top, setTop }) {
       <div className="msg err" role="alert">{err}</div>
       <ol aria-label="Your Top 5">
         {top.map((t, i) => (
-          <li key={`${t}-${i}`}><span className="n">#{i + 1}</span><span className="t">{t}</span>
+          <li key={t}><span className="n">#{i + 1}</span><span className="t">{t}</span>
             <button type="button" aria-label={`Move up ${t}`} onClick={() => move(i, -1)}>↑</button>
             <button type="button" aria-label={`Move down ${t}`} onClick={() => move(i, 1)}>↓</button>
-            <button type="button" aria-label={`Remove ${t}`} onClick={() => setTop((prev) => prev.filter((_, x) => x !== i))}>✕</button></li>
+            <button type="button" aria-label={`Remove ${t}`} onClick={() => remove(i)}>✕</button></li>
         ))}
       </ol>
     </fieldset>
