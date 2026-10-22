@@ -5,6 +5,14 @@ import { toPngBlob, download } from './lib/exportPng.js';
 import { isValidHandle, SHARE_TEXT,  SHARE_URL } from './lib/validate.js';
 import { useMediaQuery } from './lib/useMediaQuery.js';
 const EMPTY = { handle: '', name: '', photo: null, photoSrc: null, year: '', top: [] };
+  
+export default function App() {
+
+  const [s, setS] = useState(EMPTY);
+  const [am, setAm] = useState({ t: '', c: '' });
+  const exportRef = useRef(null);
+  const [code] = useState(() => String(Math.floor(Math.random() * 1e6)).padStart(6, '0'));
+  const vertical = useMediaQuery('(max-width: 640px)');
   const fileRef = useRef(null);
 
 useEffect(() => {
@@ -19,13 +27,6 @@ useEffect(() => {
   }, 800);
   return () => { cancelled = true; clearTimeout(t); };
 }, [s.handle, s.name, s.photo, s.year, s.top]);
-export default function App() {
-
-  const [s, setS] = useState(EMPTY);
-  const [am, setAm] = useState({ t: '', c: '' });
-  const exportRef = useRef(null);
-  const [code] = useState(() => String(Math.floor(Math.random() * 1e6)).padStart(6, '0'));
-  const vertical = useMediaQuery('(max-width: 640px)');
   const blob = async () => {
     if (!isValidHandle(s.handle)) {
       setAm({ t: 'Add your X handle to begin.', c: 'err' });
