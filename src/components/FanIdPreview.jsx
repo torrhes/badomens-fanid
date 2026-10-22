@@ -5,12 +5,12 @@ export default function FanIdPreview({ vertical, exportMode, ...props }) {
   const v = vertical && !exportMode;
   return (
     <div
-      className={`wrap${v ? ' v' : ''}`}
+      className={`wrap${v ? ' v' : ''}${exportMode ? ' export' : ''}`}
       style={exportMode ? { width: 960, maxWidth: 'none' } : undefined}
     >
       <div
-        className={`scene${v ? ' v' : ''}`}
-        data-layout={v ? 'vertical' : 'landscape'}
+        className={`scene${v ? ' v' : ''}${exportMode ? ' export' : ''}`}
+        data-layout={exportMode ? 'landscape' : v ? 'vertical' : 'landscape'}
         style={exportMode ? { '--c': '1px', width: 960, height: 760, aspectRatio: 'auto' } : undefined}
       >
 

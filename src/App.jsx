@@ -13,23 +13,23 @@ export default function App() {
   const vertical = useMediaQuery('(max-width: 640px)');
   const blob = async () => {
     if (!isValidHandle(s.handle)) {
-      setAm({ t: 'Add your X handle first.', c: 'err' });
+      setAm({ t: 'Add your X handle to begin.', c: 'err' });
       return null;
     }
 
-    const scene = exportRef.current?.querySelector('.scene') || document.querySelector('.scene');
+    const scene = exportRef.current?.querySelector('.scene.export') || document.querySelector('.scene.export');
     if (!scene) {
-      setAm({ t: 'Preview not ready yet. Try again in a moment.', c: 'err' });
+      setAm({ t: 'Preview isn’t ready yet. Please try again.', c: 'err' });
       return null;
     }
 
-    setAm({ t: 'Generating…', c: '' });
+    setAm({ t: 'Creating your card…', c: '' });
 
     try {
       return await toPngBlob(scene);
     } catch (error) {
       console.error('PNG export failed', error);
-      setAm({ t: 'Could not generate the image. Try again.', c: 'err' });
+      setAm({ t: 'Something went wrong while creating the image.', c: 'err' });
       return null;
     }
   };
@@ -47,15 +47,18 @@ export default function App() {
     <header>
       <div className="an kicker">AN INDEPENDENT FAN PROJECT</div>
       <h1>BAD OMENS</h1><div className="an tag">FAN ID</div>
-      <p>Your music. Your story. Your place in the fandom. Build your collectible Fan ID with your X profile and your Top 5!</p>
+      <p>Your music. Your story. Your place in the fandom. Create your own Bad Omens fan card with your X profile and Top 5 picks.</p>
     </header>
     <main>
       <FanIdForm state={s} setState={setS} onReset={() => { setS(EMPTY); setAm({ t: '', c: '' }); }} />
       <section className="stage" aria-label="Preview" ref={exportRef}>
+        <div className="export-scene" aria-hidden="true">
+          <FanIdPreview exportMode vertical={false} code={code} handle={s.handle} name={s.name} photo={s.photo} year={s.year} top={s.top} />
+        </div>
         <FanIdPreview vertical={vertical} code={code} handle={s.handle} name={s.name} photo={s.photo} year={s.year} top={s.top} />
         <div className="actions">
           <button className="pri" type="button" onClick={dl}>DOWNLOAD</button>
-          <button type="button" onClick={share}>SHARE </button>
+          <button type="button" onClick={share}>SHARE</button>
         </div>
         <div className={`msg ${am.c}`} role="status">{am.t}</div>
       </section>

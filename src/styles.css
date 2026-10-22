@@ -67,6 +67,18 @@ main {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   gap: 32px;
 }
+
+.export-scene {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  visibility: visible;
+}
 @media (max-width: 900px) {
   main {
     grid-template-columns: 1fr;
