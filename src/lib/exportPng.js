@@ -16,6 +16,12 @@ export function getShareUrl(text, url) {
   return shareUrl;
 }
 
+export function getMobileXAppUrl(text, url) {
+  const shareUrl = new URL('x://post');
+  shareUrl.searchParams.set('text', `${text} ${url}`.trim());
+  return shareUrl.toString();
+}
+
 export async function toPngBlob(el, layout = 'horizontal') {
   const { width, height } = getExportDimensions(layout);
   await document.fonts.ready;

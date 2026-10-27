@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   EXPORT_LAYOUTS,
   getExportDimensions,
+  getMobileXAppUrl,
   getShareUrl
 } from './exportPng.js';
 
@@ -23,5 +24,13 @@ describe('export settings', () => {
     expect(url.pathname).toBe('/intent/post');
     expect(url.searchParams.get('text')).toBe('Hello');
     expect(url.searchParams.get('url')).toBe('https://example.com');
+  });
+
+  it('builds a mobile X app deep link with the message', () => {
+    const url = getMobileXAppUrl('Hello', 'https://example.com');
+    expect(url).toContain('x://post');
+    expect(url).toContain('text=');
+    expect(url).toContain('Hello');
+    expect(url).toContain('https%3A%2F%2Fexample.com');
   });
 });

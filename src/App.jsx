@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import FanIdForm from './components/FanIdForm.jsx';
 import FanIdPreview from './components/FanIdPreview.jsx';
-import { toPngBlob, download, getShareUrl } from './lib/exportPng.js';
+import { toPngBlob, download, getShareUrl, getMobileXAppUrl } from './lib/exportPng.js';
 import { isValidHandle, SHARE_TEXT, SHARE_URL } from './lib/validate.js';
 import { useMediaQuery } from './lib/useMediaQuery.js';
 
@@ -66,13 +66,41 @@ export default function App() {
     setAm({ t: `Downloaded ${name}`, c: 'ok' });
   };
 
-  const share = () => {
+  const share = async () => {
     if (!isValidHandle(s.handle)) {
       setAm({ t: 'Add your X handle first.', c: 'err' });
       return;
     }
 
+    const file = fileRef.current;
+    const text = `${SHARE_TEXT} ${SHARE_URL}`;
     const shareUrl = getShareUrl(SHARE_TEXT, SHARE_URL);
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(window.navigator.userAgent) || navigator.maxTouchPoints > 1;
+
+    if (navigator.canShare && file) {
+      try {
+        await navigator.share({ files: [file], text });
+        setAm({ t: '', c: '' });
+        return;
+      } catch (e) {
+        if (e && e.name === 'AbortError') {
+          setAm({ t: '', c: '' });
+          return;
+        }
+      }
+    }
+
+    if (isMobile) {
+      const appUrl = getMobileXAppUrl(SHARE_TEXT, SHARE_URL);
+      const fallbackUrl = shareUrl.toString();
+      window.location.href = appUrl;
+      setTimeout(() => {
+        window.location.href = fallbackUrl;
+      }, 1200);
+      setAm({ t: 'Opening X…', c: 'ok' });
+      return;
+    }
+
     window.open(shareUrl.toString(), '_blank', 'noopener,noreferrer');
     setAm({ t: 'Opening X to share your Fan ID…', c: 'ok' });
   };
