@@ -1,22 +1,35 @@
 import html2canvas from 'html2canvas';
 
-// A exportação é sempre a carteirinha horizontal (960 x 760),
-// independente do layout mostrado na tela.
-const W = 960;
-const H = 760;
+export const EXPORT_LAYOUTS = {
+  horizontal: { width: 960, height: 760 },
+  vertical: { width: 760, height: 1200 }
+};
 
-export async function toPngBlob(el) {
+export function getExportDimensions(layout = 'horizontal') {
+  return EXPORT_LAYOUTS[layout] || EXPORT_LAYOUTS.horizontal;
+}
+
+export function getShareUrl(text, url) {
+  const shareUrl = new URL('https://x.com/intent/post');
+  shareUrl.searchParams.set('text', text);
+  shareUrl.searchParams.set('url', url);
+  return shareUrl;
+}
+
+export async function toPngBlob(el, layout = 'horizontal') {
+  const { width, height } = getExportDimensions(layout);
   await document.fonts.ready;
   const canvas = await html2canvas(el, {
     scale: 2,
     backgroundColor: null,
     useCORS: true,
-    width: W,
-    height: H,
+    width,
+    height,
     windowWidth: 1280
   });
   return new Promise((res) => canvas.toBlob(res, 'image/png'));
 }
+
 export function download(blob, name) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);

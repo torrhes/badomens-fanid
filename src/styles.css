@@ -224,6 +224,31 @@ li button {
   margin: 0 auto;
   container-type: inline-size;
 }
+.format-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto 12px;
+  flex-wrap: wrap;
+}
+
+.format-toggle label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.format-toggle input {
+  width: auto;
+  min-height: auto;
+  accent-color: var(--red);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
