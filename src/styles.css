@@ -256,6 +256,11 @@ li button {
   align-content: center;
   justify-content: center;
 }
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 footer {
   max-width: 1200px;
   margin: auto;

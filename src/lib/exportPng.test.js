@@ -5,6 +5,7 @@ import {
   getMobileXAppUrl,
   getShareUrl
 } from './exportPng.js';
+import { isCardComplete } from './validate.js';
 
 describe('export settings', () => {
   it('keeps the default horizontal size', () => {
@@ -13,8 +14,8 @@ describe('export settings', () => {
 
   it('returns the selected vertical size', () => {
     expect(getExportDimensions('vertical')).toEqual({
-      width: 760,
-      height: 1200
+      width: 480,
+      height: 1024
     });
   });
 
@@ -32,5 +33,29 @@ describe('export settings', () => {
     expect(url).toContain('text=');
     expect(url).toContain('Hello');
     expect(url).toContain('https%3A%2F%2Fexample.com');
+  });
+
+  it('blocks completion until required fields are filled', () => {
+    expect(
+      isCardComplete({
+        handle: 'user',
+        year: '2024',
+        top: ['a', 'b', 'c', 'd', 'e']
+      })
+    ).toBe(true);
+    expect(
+      isCardComplete({
+        handle: 'user',
+        year: '2024',
+        top: ['a', 'b', 'c', 'd']
+      })
+    ).toBe(false);
+    expect(
+      isCardComplete({
+        handle: '',
+        year: '2024',
+        top: ['a', 'b', 'c', 'd', 'e']
+      })
+    ).toBe(false);
   });
 });

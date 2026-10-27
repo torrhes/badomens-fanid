@@ -2,7 +2,7 @@ import html2canvas from 'html2canvas';
 
 export const EXPORT_LAYOUTS = {
   horizontal: { width: 960, height: 760 },
-  vertical: { width: 760, height: 1200 }
+  vertical: { width: 480, height: 1024 }
 };
 
 export function getExportDimensions(layout = 'horizontal') {

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import FanIdForm from './components/FanIdForm.jsx';
 import FanIdPreview from './components/FanIdPreview.jsx';
 import { toPngBlob, download, getShareUrl, getMobileXAppUrl } from './lib/exportPng.js';
-import { isValidHandle, SHARE_TEXT, SHARE_URL } from './lib/validate.js';
+import { isCardComplete, isValidHandle, SHARE_TEXT, SHARE_URL } from './lib/validate.js';
 import { useMediaQuery } from './lib/useMediaQuery.js';
 
 const EMPTY = { handle: '', name: '', photo: null, photoSrc: null, year: '', top: [] };
@@ -15,6 +15,7 @@ export default function App() {
   const [code] = useState(() => String(Math.floor(Math.random() * 1e6)).padStart(6, '0'));
   const vertical = useMediaQuery('(max-width: 640px)');
   const previewVertical = exportLayout === 'vertical' ? true : exportLayout === 'horizontal' ? false : vertical;
+  const isReady = isCardComplete(s);
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -36,8 +37,8 @@ export default function App() {
   }, [s.handle, s.name, s.photo, s.year, s.top, exportLayout]);
 
   const blob = async (layout = exportLayout) => {
-    if (!isValidHandle(s.handle)) {
-      setAm({ t: 'Add your X handle to begin.', c: 'err' });
+    if (!isReady) {
+      setAm({ t: 'Complete all required fields before downloading or sharing.', c: 'err' });
       return null;
     }
 
@@ -59,6 +60,10 @@ export default function App() {
   };
 
   const dl = async () => {
+    if (!isReady) {
+      setAm({ t: 'Complete all required fields before downloading.', c: 'err' });
+      return;
+    }
     const b = await blob(exportLayout);
     if (!b) return;
     const name = `bad-omens-fan-id-${exportLayout}.png`;
@@ -67,8 +72,8 @@ export default function App() {
   };
 
   const share = async () => {
-    if (!isValidHandle(s.handle)) {
-      setAm({ t: 'Add your X handle first.', c: 'err' });
+    if (!isReady) {
+      setAm({ t: 'Complete all required fields before sharing.', c: 'err' });
       return;
     }
 
@@ -131,8 +136,8 @@ export default function App() {
             </label>
           </div>
           <div className="actions">
-            <button className="pri" type="button" onClick={dl}>DOWNLOAD</button>
-            <button type="button" onClick={share}>SHARE</button>
+            <button className="pri" type="button" onClick={dl} disabled={!isReady}>DOWNLOAD</button>
+            <button className="pri" type="button" onClick={share} disabled={!isReady}>SHARE</button>
           </div>
           <div className={`msg ${am.c}`} role="status">{am.t}</div>
         </section>
